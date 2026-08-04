@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 
 import { useRunSocket } from '@/features/execution/hooks/use-run-socket'
 import { useResumeRun, useRunQuery, useStartRun } from '@/features/execution/hooks/use-run'
+import { applyRunEvent } from '@/features/execution/apply-run-event'
 import type { NodeRuntimeState, RunEventPayload } from '@/features/execution/types'
 import type { AgentFlowEdge, NodeStatus } from '@/features/canvas/types'
 
@@ -45,57 +46,8 @@ export function useWorkflowRun({ workflowId, edges, onNodeStatusChange }: UseWor
 
   const handleEvent = useCallback(
     (event: RunEventPayload) => {
-      const { nodeId, eventType, payload } = event
-
-      setNodeRuntime((prev) => {
-        const current: NodeRuntimeState = prev[nodeId] ?? {
-          status: 'idle',
-          tokens: '',
-          toolCalls: [],
-        }
-
-        switch (eventType) {
-          case 'node.started':
-            return { ...prev, [nodeId]: { status: 'running', tokens: '', toolCalls: [] } }
-          case 'node.token':
-            return {
-              ...prev,
-              [nodeId]: { ...current, tokens: current.tokens + ((payload.token as string) ?? '') },
-            }
-          case 'node.tool_call':
-            return {
-              ...prev,
-              [nodeId]: {
-                ...current,
-                toolCalls: [
-                  ...current.toolCalls,
-                  {
-                    toolName: payload.toolName as string,
-                    arguments: payload.arguments,
-                    result: payload.result as string | undefined,
-                    error: payload.error as string | undefined,
-                  },
-                ],
-              },
-            }
-          case 'node.completed':
-            return {
-              ...prev,
-              [nodeId]: { ...current, status: 'done', output: payload.output as string | undefined },
-            }
-          case 'node.error':
-            return {
-              ...prev,
-              [nodeId]: {
-                ...current,
-                status: 'error',
-                errorMessage: payload.message as string | undefined,
-              },
-            }
-          default:
-            return prev
-        }
-      })
+      const { nodeId, eventType } = event
+      setNodeRuntime((prev) => applyRunEvent(prev, event))
 
       if (eventType === 'node.started') {
         onNodeStatusChange(nodeId, 'running')

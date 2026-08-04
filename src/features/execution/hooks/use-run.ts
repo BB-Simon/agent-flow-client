@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { getRun, resumeRun, startRun } from '@/features/execution/api/execution-api'
+import { getRun, listRuns, resumeRun, startRun } from '@/features/execution/api/execution-api'
 
 const TERMINAL_STATUSES = new Set(['completed', 'failed'])
 
@@ -19,6 +19,14 @@ export function useRunQuery(runId: string | null) {
     enabled: !!runId,
     refetchInterval: (query) =>
       query.state.data && TERMINAL_STATUSES.has(query.state.data.status) ? false : 1500,
+  })
+}
+
+export function useRunsQuery(workflowId: string, params: { limit: number; offset: number }) {
+  return useQuery({
+    queryKey: ['workflows', workflowId, 'runs', params],
+    queryFn: () => listRuns(workflowId, params),
+    enabled: !!workflowId,
   })
 }
 

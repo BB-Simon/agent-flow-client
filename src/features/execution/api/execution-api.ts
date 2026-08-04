@@ -30,6 +30,32 @@ export interface Run {
   events?: RunEventRecord[]
 }
 
+export interface RunSummary {
+  id: string
+  status: RunStatus
+  input: string | null
+  startedAt: string
+  finishedAt: string | null
+  durationMs: number | null
+  tokenUsage: TokenUsage
+}
+
+export interface RunsPage {
+  runs: RunSummary[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export async function listRuns(workflowId: string, params: { limit?: number; offset?: number } = {}) {
+  const { data } = await apiClient.get<RunsPage>(`/workflows/${workflowId}/runs`, { params })
+  return data
+}
+
+export function runExportUrl(runId: string) {
+  return `${apiClient.defaults.baseURL}/runs/${runId}/export`
+}
+
 export async function startRun(workflowId: string, input?: string) {
   const { data } = await apiClient.post<Run>(`/workflows/${workflowId}/runs`, { input })
   return data

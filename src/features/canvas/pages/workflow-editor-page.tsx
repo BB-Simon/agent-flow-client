@@ -14,7 +14,7 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { ArrowLeft, Check, Loader2, Play, Square } from 'lucide-react'
+import { ArrowLeft, Check, History, Loader2, Play, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
 
@@ -295,6 +295,10 @@ function WorkflowEditor() {
           className="h-8 w-56"
         />
         <SaveIndicator state={saveState} dirty={dirty} />
+        <Button size="sm" variant="outline" onClick={() => navigate(`/workflows/${id}/runs`)}>
+          <History className="h-3.5 w-3.5" />
+          History
+        </Button>
         <Button size="sm" variant="outline" onClick={handleManualSave} disabled={updateWorkflow.isPending}>
           Save
         </Button>

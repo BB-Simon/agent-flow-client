@@ -9,6 +9,8 @@ import { ResetPasswordPage } from '@/features/auth/pages/reset-password-page'
 import { ProtectedRoute } from '@/features/auth/components/protected-route'
 import { WorkflowListPage } from '@/features/canvas/pages/workflow-list-page'
 import { WorkflowEditorPage } from '@/features/canvas/pages/workflow-editor-page'
+import { RunHistoryPage } from '@/features/execution/pages/run-history-page'
+import { RunReplayPage } from '@/features/execution/pages/run-replay-page'
 
 function App() {
   useAuthBootstrap()
@@ -33,6 +35,22 @@ function App() {
         element={
           <ProtectedRoute>
             <WorkflowEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workflows/:id/runs"
+        element={
+          <ProtectedRoute>
+            <RunHistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workflows/:id/runs/:runId"
+        element={
+          <ProtectedRoute>
+            <RunReplayPage />
           </ProtectedRoute>
         }
       />
