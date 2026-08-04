@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
+import { useAuthStore } from '@/store/auth-store'
 import { useAuthBootstrap } from '@/features/auth/hooks/use-auth'
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { SignupPage } from '@/features/auth/pages/signup-page'
@@ -14,12 +15,23 @@ import { RunReplayPage } from '@/features/execution/pages/run-replay-page'
 import { BillingPage } from '@/features/billing/pages/billing-page'
 import { TeamSettingsPage } from '@/features/team/pages/team-settings-page'
 import { ApiKeysPage } from '@/features/api-keys/pages/api-keys-page'
+import { LandingPage } from '@/features/marketing/pages/landing-page'
+import { QuickstartPage } from '@/features/marketing/pages/quickstart-page'
+
+function RootRoute() {
+  const status = useAuthStore((s) => s.status)
+  if (status === 'loading') return null
+  if (status === 'authenticated') return <Navigate to="/workflows" replace />
+  return <LandingPage />
+}
 
 function App() {
   useAuthBootstrap()
 
   return (
     <Routes>
+      <Route path="/" element={<RootRoute />} />
+      <Route path="/docs" element={<QuickstartPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -81,8 +93,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/workflows" replace />} />
-      <Route path="*" element={<Navigate to="/workflows" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

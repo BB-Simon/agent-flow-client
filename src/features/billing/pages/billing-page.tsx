@@ -14,32 +14,7 @@ import {
   useCreatePortal,
   useCurrentUsageQuery,
 } from '@/features/billing/hooks/use-billing'
-import type { Plan } from '@/features/billing/api/billing-api'
-
-const PLAN_ORDER: Plan[] = ['FREE', 'PRO', 'TEAM']
-
-const PLANS: { plan: Plan; name: string; features: string[] }[] = [
-  {
-    plan: 'FREE',
-    name: 'Free',
-    features: ['1 workflow', '20 runs / month', 'No team invites'],
-  },
-  {
-    plan: 'PRO',
-    name: 'Pro',
-    features: ['Unlimited workflows', '500 runs / month', 'Team invites'],
-  },
-  {
-    plan: 'TEAM',
-    name: 'Team',
-    features: [
-      'Unlimited workflows',
-      'Unlimited runs (usage-based overages)',
-      'Priority support',
-      'SSO option',
-    ],
-  },
-]
+import { PLAN_ORDER, PLANS } from '@/features/billing/plans'
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof AxiosError) {
