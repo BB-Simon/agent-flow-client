@@ -11,6 +11,7 @@ import { WorkflowListPage } from '@/features/canvas/pages/workflow-list-page'
 import { WorkflowEditorPage } from '@/features/canvas/pages/workflow-editor-page'
 import { RunHistoryPage } from '@/features/execution/pages/run-history-page'
 import { RunReplayPage } from '@/features/execution/pages/run-replay-page'
+import { BillingPage } from '@/features/billing/pages/billing-page'
 
 function App() {
   useAuthBootstrap()
@@ -51,6 +52,14 @@ function App() {
         element={
           <ProtectedRoute>
             <RunReplayPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing"
+        element={
+          <ProtectedRoute>
+            <BillingPage />
           </ProtectedRoute>
         }
       />

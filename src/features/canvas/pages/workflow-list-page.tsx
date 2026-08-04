@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Plus, Workflow as WorkflowIcon } from 'lucide-react'
 
-import { useAuthStore } from '@/store/auth-store'
-import { useLogout } from '@/features/auth/hooks/use-auth'
+import { AppHeader } from '@/components/app-header'
 import { useCreateWorkflow, useWorkflowsQuery } from '@/features/canvas/hooks/use-workflows'
 import { createStarterGraph } from '@/features/canvas/utils'
 import { Button } from '@/components/ui/button'
@@ -10,8 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export function WorkflowListPage() {
   const navigate = useNavigate()
-  const user = useAuthStore((s) => s.user)
-  const logout = useLogout()
   const { data: workflows, isLoading } = useWorkflowsQuery()
   const createWorkflow = useCreateWorkflow()
 
@@ -24,22 +21,7 @@ export function WorkflowListPage() {
 
   return (
     <div className="min-h-svh bg-background">
-      <header className="flex items-center justify-between border-b border-border px-6 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 ring-1 ring-primary/40">
-            <span className="block h-2 w-2 rounded-full bg-primary" />
-          </div>
-          <span className="text-sm font-semibold tracking-tight text-foreground">
-            Agent Flow
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">{user?.email}</span>
-          <Button variant="outline" size="sm" onClick={() => logout.mutate()}>
-            Log out
-          </Button>
-        </div>
-      </header>
+      <AppHeader />
 
       <main className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
