@@ -7,7 +7,8 @@ import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page'
 import { ForgotPasswordPage } from '@/features/auth/pages/forgot-password-page'
 import { ResetPasswordPage } from '@/features/auth/pages/reset-password-page'
 import { ProtectedRoute } from '@/features/auth/components/protected-route'
-import { DashboardPage } from '@/features/dashboard/dashboard-page'
+import { WorkflowListPage } from '@/features/canvas/pages/workflow-list-page'
+import { WorkflowEditorPage } from '@/features/canvas/pages/workflow-editor-page'
 
 function App() {
   useAuthBootstrap()
@@ -20,14 +21,23 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
-        path="/"
+        path="/workflows"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <WorkflowListPage />
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="/workflows/:id"
+        element={
+          <ProtectedRoute>
+            <WorkflowEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/" element={<Navigate to="/workflows" replace />} />
+      <Route path="*" element={<Navigate to="/workflows" replace />} />
     </Routes>
   )
 }

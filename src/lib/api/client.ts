@@ -44,8 +44,6 @@ apiClient.interceptors.response.use(
       refreshPromise ??= refreshSession()
       await refreshPromise
       return apiClient(originalRequest)
-    } catch (refreshError) {
-      throw refreshError
     } finally {
       refreshPromise = null
     }

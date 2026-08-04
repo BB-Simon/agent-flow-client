@@ -49,9 +49,8 @@
     'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  /* faint per-type tints for canvas nodes (Agent, Tool, Router, Aggregator,
-     HumanReview, Output) — consumed by the React Flow canvas built in a
-     later step */
+  /* faint per-type tints for canvas nodes */
+  --node-input: #a1a1aa;
   --node-agent: #8b5cf6;
   --node-tool: #38bdf8;
   --node-router: #fb923c;
@@ -86,6 +85,7 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
+  --color-node-input: var(--node-input);
   --color-node-agent: var(--node-agent);
   --color-node-tool: var(--node-tool);
   --color-node-router: var(--node-router);
@@ -147,4 +147,56 @@
   to {
     offset-distance: 100%;
   }
+}
+
+/* React Flow canvas theming — keep the chrome quiet, the graph is the focus */
+.react-flow {
+  --xy-background-color: var(--background);
+  --xy-background-pattern-dots-color: var(--border);
+  --xy-edge-stroke: var(--border);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-stroke-selected: var(--accent);
+  --xy-controls-button-background-color: var(--panel);
+  --xy-controls-button-background-color-hover: var(--muted);
+  --xy-controls-button-color: var(--muted-foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-minimap-background-color: var(--panel);
+  --xy-minimap-mask-background-color: rgba(10, 10, 11, 0.6);
+  --xy-node-boxshadow-hover: none;
+  --xy-node-boxshadow-selected: none;
+  --xy-selection-background-color: rgba(139, 92, 246, 0.08);
+  --xy-selection-border: 1px solid var(--accent);
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.react-flow__handle.af-handle {
+  width: 8px;
+  height: 8px;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  transition: border-color 0.15s ease;
+}
+
+.react-flow__handle.af-handle:hover,
+.react-flow__handle.connecting {
+  border-color: var(--accent);
+}
+
+.react-flow__edge.af-edge-active .react-flow__edge-path {
+  stroke: var(--accent);
+}
+
+.af-edge-dot {
+  fill: var(--accent);
+  filter: drop-shadow(0 0 4px var(--accent-glow));
+  offset-rotate: 0deg;
+  animation: af-travel-dot 1.4s linear infinite;
 }
