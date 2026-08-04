@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import type { NodeStatus } from '@/features/canvas/types'
@@ -18,6 +18,7 @@ interface BaseNodeProps {
 const STATUS_LABEL: Record<NodeStatus, string> = {
   idle: 'Idle',
   running: 'Running',
+  waiting_human: 'Waiting on human review',
   done: 'Done',
   error: 'Error',
 }
@@ -38,10 +39,13 @@ export function BaseNode({
         'group relative w-56 rounded-lg border bg-card px-3 py-2.5 shadow-sm transition-shadow',
         status === 'error'
           ? 'border-destructive/60'
-          : selected
-            ? 'border-accent/60'
-            : 'border-border',
+          : status === 'waiting_human'
+            ? 'border-warning/60'
+            : selected
+              ? 'border-accent/60'
+              : 'border-border',
         status === 'running' && 'af-glow-running',
+        status === 'waiting_human' && 'af-glow-waiting',
         status === 'error' && 'shadow-[0_0_16px_-2px_rgba(239,68,68,0.4)]',
       )}
       title={STATUS_LABEL[status]}
@@ -79,6 +83,9 @@ function StatusIndicator({ status }: { status: NodeStatus }) {
   }
   if (status === 'error') {
     return <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+  }
+  if (status === 'waiting_human') {
+    return <Clock className="h-4 w-4 shrink-0 text-warning" />
   }
   if (status === 'running') {
     return <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-accent" />

@@ -14,7 +14,7 @@ import {
   type NodeMouseHandler,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { ArrowLeft, Check, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, Play, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
 
@@ -26,14 +26,19 @@ import {
   useWorkflowQuery,
 } from '@/features/canvas/hooks/use-workflows'
 import { nodeTypes } from '@/features/canvas/nodes'
+import { edgeTypes } from '@/features/canvas/edges'
 import { NodePalette } from '@/features/canvas/components/node-palette'
 import { NodeConfigDrawer } from '@/features/canvas/components/node-config-drawer'
 import { createNode } from '@/features/canvas/utils'
+import { useWorkflowRun } from '@/features/execution/hooks/use-workflow-run'
+import { RunPanel } from '@/features/execution/components/run-panel'
+import { HumanReviewModal } from '@/features/execution/components/human-review-modal'
 import type {
   AgentFlowEdge,
   AgentFlowNode,
   AgentFlowNodeData,
   AgentFlowNodeType,
+  NodeStatus,
 } from '@/features/canvas/types'
 
 const AUTOSAVE_DELAY_MS = 2000
@@ -68,6 +73,8 @@ function WorkflowEditor() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [runInput, setRunInput] = useState('')
+  const [showRunPanel, setShowRunPanel] = useState(false)
   const hydrated = useRef(false)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -136,7 +143,11 @@ function WorkflowEditor() {
     (connection: Connection) => {
       setEdges((eds) =>
         addEdge(
-          { ...connection, markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--border)' } },
+          {
+            ...connection,
+            type: 'animated',
+            markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--border)' },
+          },
           eds,
         ),
       )
@@ -184,13 +195,72 @@ function WorkflowEditor() {
     [setNodes, setEdges, markDirty],
   )
 
+  // Transient run status — never marks the graph dirty and is stripped before save.
+  const handleNodeStatusChange = useCallback(
+    (nodeId: string, status: NodeStatus) => {
+      setNodes((nds) =>
+        nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, status } } : n)),
+      )
+    },
+    [setNodes],
+  )
+
+  const {
+    run,
+    runStatus,
+    isActive,
+    isStarting,
+    isResuming,
+    nodeRuntime,
+    activeEdgeIds,
+    pendingReview,
+    start,
+    resume,
+  } = useWorkflowRun({ workflowId: id!, edges, onNodeStatusChange: handleNodeStatusChange })
+
+  const renderEdges = useMemo(
+    () =>
+      edges.map((edge) => ({
+        ...edge,
+        type: edge.type ?? 'animated',
+        data: { ...edge.data, active: activeEdgeIds.has(edge.id) },
+      })),
+    [edges, activeEdgeIds],
+  )
+
   const selectedNode = useMemo(
     () => nodes.find((n) => n.id === selectedNodeId) ?? null,
     [nodes, selectedNodeId],
   )
 
+  const reviewNode = pendingReview
+    ? (nodes.find((n) => n.id === pendingReview.nodeId) ?? null)
+    : null
+
   function handleManualSave() {
     save({ name, graphJson: { nodes: stripRuntimeFields(nodes), edges } })
+  }
+
+  async function handleRun() {
+    if (dirty) {
+      try {
+        await updateWorkflow.mutateAsync({
+          name,
+          graphJson: { nodes: stripRuntimeFields(nodes), edges },
+        })
+        setDirty(false)
+        setSaveState('saved')
+      } catch (error) {
+        toast.error('Could not save before running', {
+          description: extractGraphErrors(error).join(' '),
+        })
+        return
+      }
+    }
+
+    setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, status: 'idle' } })))
+    setShowRunPanel(true)
+    start(runInput.trim() || undefined)
   }
 
   if (isLoading || !workflow) {
@@ -216,31 +286,56 @@ function WorkflowEditor() {
           className="h-8 w-64 border-transparent bg-transparent px-2 text-sm font-medium hover:border-border focus-visible:border-input"
         />
         <div className="flex-1" />
+
+        <Input
+          value={runInput}
+          onChange={(e) => setRunInput(e.target.value)}
+          placeholder="Run input (optional)"
+          disabled={isActive}
+          className="h-8 w-56"
+        />
         <SaveIndicator state={saveState} dirty={dirty} />
-        <Button size="sm" onClick={handleManualSave} disabled={updateWorkflow.isPending}>
+        <Button size="sm" variant="outline" onClick={handleManualSave} disabled={updateWorkflow.isPending}>
           Save
+        </Button>
+        <Button size="sm" onClick={handleRun} disabled={isActive || isStarting}>
+          {isActive ? <Square className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+          {isActive ? 'Running…' : 'Run'}
         </Button>
       </header>
 
       <div className="flex min-h-0 flex-1">
         <NodePalette onAdd={handleAddNode} />
 
-        <div className="min-w-0 flex-1">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={handleEdgesChange}
-            onConnect={handleConnect}
-            onNodeClick={handleNodeClick}
-            onPaneClick={handlePaneClick}
-            nodeTypes={nodeTypes}
-            fitView
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
-            <Controls showInteractive={false} />
-          </ReactFlow>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1">
+            <ReactFlow
+              nodes={nodes}
+              edges={renderEdges}
+              onNodesChange={handleNodesChange}
+              onEdgesChange={handleEdgesChange}
+              onConnect={handleConnect}
+              onNodeClick={handleNodeClick}
+              onPaneClick={handlePaneClick}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              fitView
+              proOptions={{ hideAttribution: true }}
+            >
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
+              <Controls showInteractive={false} />
+            </ReactFlow>
+          </div>
+
+          {showRunPanel ? (
+            <RunPanel
+              run={run}
+              runStatus={runStatus}
+              nodeRuntime={nodeRuntime}
+              nodes={nodes}
+              onClose={() => setShowRunPanel(false)}
+            />
+          ) : null}
         </div>
 
         {selectedNode ? (
@@ -254,6 +349,15 @@ function WorkflowEditor() {
           />
         ) : null}
       </div>
+
+      {pendingReview ? (
+        <HumanReviewModal
+          nodeLabel={reviewNode?.data.label ?? pendingReview.nodeId}
+          input={pendingReview.input}
+          isResuming={isResuming}
+          onResume={resume}
+        />
+      ) : null}
     </div>
   )
 }

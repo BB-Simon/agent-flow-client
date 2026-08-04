@@ -139,14 +139,23 @@
   animation: af-pulse-glow 1.8s ease-in-out infinite;
 }
 
-/* Small dot traveling along an edge while a run is active (React Flow canvas) */
-@keyframes af-travel-dot {
-  from {
-    offset-distance: 0%;
+/* Amber variant — HumanReviewNode paused waiting on a decision */
+@keyframes af-pulse-glow-warning {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px var(--warning),
+      0 0 12px 2px rgba(245, 158, 11, 0.5);
   }
-  to {
-    offset-distance: 100%;
+  50% {
+    box-shadow:
+      0 0 0 1px var(--warning),
+      0 0 22px 6px rgba(245, 158, 11, 0.5);
   }
+}
+
+.af-glow-waiting {
+  animation: af-pulse-glow-warning 1.8s ease-in-out infinite;
 }
 
 /* React Flow canvas theming — keep the chrome quiet, the graph is the focus */
@@ -197,6 +206,4 @@
 .af-edge-dot {
   fill: var(--accent);
   filter: drop-shadow(0 0 4px var(--accent-glow));
-  offset-rotate: 0deg;
-  animation: af-travel-dot 1.4s linear infinite;
 }

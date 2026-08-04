@@ -1,6 +1,6 @@
 import type { Edge, Node } from '@xyflow/react'
 
-export type NodeStatus = 'idle' | 'running' | 'done' | 'error'
+export type NodeStatus = 'idle' | 'running' | 'waiting_human' | 'done' | 'error'
 
 export const NODE_TYPES = [
   'InputNode',
