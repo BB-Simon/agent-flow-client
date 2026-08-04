@@ -12,6 +12,8 @@ import { WorkflowEditorPage } from '@/features/canvas/pages/workflow-editor-page
 import { RunHistoryPage } from '@/features/execution/pages/run-history-page'
 import { RunReplayPage } from '@/features/execution/pages/run-replay-page'
 import { BillingPage } from '@/features/billing/pages/billing-page'
+import { TeamSettingsPage } from '@/features/team/pages/team-settings-page'
+import { ApiKeysPage } from '@/features/api-keys/pages/api-keys-page'
 
 function App() {
   useAuthBootstrap()
@@ -60,6 +62,22 @@ function App() {
         element={
           <ProtectedRoute>
             <BillingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/team"
+        element={
+          <ProtectedRoute>
+            <TeamSettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/api-keys"
+        element={
+          <ProtectedRoute>
+            <ApiKeysPage />
           </ProtectedRoute>
         }
       />

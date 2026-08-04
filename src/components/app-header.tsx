@@ -4,9 +4,12 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth-store'
 import { useLogout } from '@/features/auth/hooks/use-auth'
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/features/notifications/components/notification-bell'
 
 const NAV_LINKS = [
   { to: '/workflows', label: 'Workflows' },
+  { to: '/team', label: 'Team' },
+  { to: '/api-keys', label: 'API Keys' },
   { to: '/billing', label: 'Billing' },
 ]
 
@@ -42,6 +45,7 @@ export function AppHeader() {
         </nav>
       </div>
       <div className="flex items-center gap-3">
+        <NotificationBell />
         <span className="text-sm text-muted-foreground">{user?.email}</span>
         <Button variant="outline" size="sm" onClick={() => logout.mutate()}>
           Log out
