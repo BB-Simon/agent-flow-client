@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Agent Flow theme — dark, developer-tool aesthetic (Linear / Vercel dark mode).
+  One accent color (electric violet) reserved for active/running state and
+  primary actions. Status colors are distinct from the accent so "running"
+  never gets confused with "done" / "error" / "waiting".
+*/
+:root {
+  --background: #0a0a0b;
+  --panel: #111113;
+  --card: #111113;
+  --card-foreground: #ededf0;
+  --popover: #111113;
+  --popover-foreground: #ededf0;
+  --foreground: #ededf0;
+
+  --muted: #19191c;
+  --muted-foreground: #8b8b93;
+
+  --border: #232327;
+  --input: #232327;
+  --ring: #8b5cf6;
+
+  --primary: #8b5cf6;
+  --primary-foreground: #fafafa;
+  --secondary: #19191c;
+  --secondary-foreground: #ededf0;
+
+  /* the ONE accent color — reserved for active/running state + primary actions */
+  --accent: #8b5cf6;
+  --accent-foreground: #fafafa;
+  --accent-glow: rgba(139, 92, 246, 0.5);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fef2f2;
+
+  --success: #22c55e;
+  --success-foreground: #052e12;
+
+  --warning: #f59e0b;
+  --warning-foreground: #2b1900;
+
+  --radius: 0.5rem;
+
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* faint per-type tints for canvas nodes (Agent, Tool, Router, Aggregator,
+     HumanReview, Output) — consumed by the React Flow canvas built in a
+     later step */
+  --node-agent: #8b5cf6;
+  --node-tool: #38bdf8;
+  --node-router: #fb923c;
+  --node-aggregator: #34d399;
+  --node-human: #f59e0b;
+  --node-output: #a1a1aa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-node-agent: var(--node-agent);
+  --color-node-tool: var(--node-tool);
+  --color-node-router: var(--node-router);
+  --color-node-aggregator: var(--node-aggregator);
+  --color-node-human: var(--node-human);
+  --color-node-output: var(--node-output);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  code,
+  pre,
+  kbd,
+  samp {
+    @apply font-mono;
+  }
+  ::selection {
+    background: var(--accent-glow);
+  }
+}
+
+/* Reusable glow ring for "running" state — canvas nodes, live indicators */
+@keyframes af-pulse-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px var(--accent),
+      0 0 12px 2px var(--accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px var(--accent),
+      0 0 22px 6px var(--accent-glow);
+  }
+}
+
+.af-glow-running {
+  animation: af-pulse-glow 1.8s ease-in-out infinite;
+}
+
+/* Small dot traveling along an edge while a run is active (React Flow canvas) */
+@keyframes af-travel-dot {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
